@@ -19,6 +19,6 @@ from django.urls import path,include
 
 urlpatterns = [
     path('',include('shareRes.urls')),#https://127.0.0.1:8000/으로 시작되고 따로 아래에 표시되지 않는 요청 처리
-    path('sendEmail/',include('sendEmail/urls')),#https://127.0.0.1:8000/sendEmail로 시작되는 요청 처리
+    path('sendEmail/',include('sendEmail.urls')),#https://127.0.0.1:8000/sendEmail로 시작되는 요청 처리
     path('admin/', admin.site.urls),
 ]
