@@ -50,9 +50,53 @@ def Create_restaurant(request):
     return HttpResponseRedirect(reverse('index')) # index 함수에서 Restaurant 추가 내용이 표출되도록 수정
     #return HttpResponse('맛집 DB 저장합니다!')
 
-def restaurantDetail(request) :
-    return render(request, 'shareRes/restaurantDetail.html')
+def restaurantDetail(request,res_id) : # 요청된 url로 게시글 id 가 전달됨(파라미터로 받아야 함)
+    # 전달된 게시글 id에 해당하는 글을 DB에서 추출한 후 인스턴스변수에 저장
+    restaurant = Restaurant.objects.get(id=res_id)
+    # 인스턴스변수로 딕셔너리생성
+    content = {'restaurant':restaurant}
+    # html 파일로 전달해서 동적 렌더링을 진행
+    return render(request, 'shareRes/restaurantDetail.html',content)
     #return HttpResponse('restaurantDetail')
+
+def restaurantUpdate(request,res_id):
+    #카테고리 수정 시 기존 카테고리에서 선택하게 해야 함(db 카테고리 테이블에서 모든 레코드 추출)
+    categories = Category.objects.all()
+    restaurant = Restaurant.objects.get(id=res_id)
+    content = {'categories':categories, 'restaurant':restaurant}
+    return render(request,'shareRes/restaurantUpdate.html',content)
+
+def Update_restaurant(request):
+    # 사용자가 수정해서 넘겨준 데이터 추출
+    resId = request.POST['resId'] # hidden 으로 넘어 옴
+    change_category_id = request.POST['resCategory']
+    change_name = request.POST['resTitle']
+    change_link = request.POST['resLink']
+    change_content = request.POST['resContent']
+    change_keyword = request.POST['resLoc']
+
+    change_category = Category.objects.get(id=change_category_id) # 사용자가 수정한 카테고리 인스턴스 추출해서 변수 저장
+    before_restaurant = Restaurant.objects.get(id=resId) # 수정할 레코드 추출해서 인스턴스 변수로 저장
+    # 수정 대상 인스턴스에 새로운 값 대입
+    before_restaurant.category = change_category
+    before_restaurant.restaurant_name = change_name
+    before_restaurant.restaurant_link = change_link
+    before_restaurant.restaurant_content = change_content
+    before_restaurant.restaurant_keyword = change_keyword
+    # db에 저장
+    before_restaurant.save()
+    # 상세보기 페이지로 재 요청 http://127.0.0.1:8000/restaurantDetail/1
+    return HttpResponseRedirect(reverse('resDetailPage', kwargs={'res_id': resId}))
+
+def Delete_restaurant(request):
+    # 삭제할 게시글 id request 에서 추출
+    res_id = request.POST['resId']
+    # db에서 삭제할 게시글 인스턴스 생성
+    restaurant = Restaurant.objects.get(id=res_id)
+    # db에서 삭제
+    restaurant.delete()
+    # index.html 재요청
+    return HttpResponseRedirect(reverse('index'))
 
 def categoryCreate(request) :
     categories = Category.objects.all() # categories 변수에는 Category 테이블의 모든 레코드를 반환 받아서 저장
